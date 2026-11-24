@@ -49,5 +49,20 @@ pipeline {
                   sh 'docker logs leave-staging'
               }
           }
+          stage('Approve Production Deployment') {
+              steps {
+                  input message: 'Staging verified. Deploy to production?', ok: 'Approve'
+              }
+          }
+
+          stage('Deploy to Production') {
+              steps {
+                  sh 'docker rm -f leave-production || true'
+                  sh 'docker run -d --name leave-production -e APP_ENV=production -p 8086:8080 leave-service:2024sl70007'
+                  sh 'sleep 3'
+                  sh 'docker logs leave-production'
+                  sh 'docker ps --filter "name=leave-"'
+              }
+          }
       }
   }
