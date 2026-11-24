@@ -33,5 +33,21 @@ pipeline {
                   """
               }
           }
+
+         stage('Build Docker Image') {
+              steps {
+                  sh 'mvn clean package -DskipTests'
+                  sh 'docker build -t leave-service:2024sl70007 .'
+              }
+          }
+
+          stage('Deploy to Staging') {
+              steps {
+                  sh 'docker rm -f leave-staging || true'
+                  sh 'docker run -d --name leave-staging -e APP_ENV=staging -p 8085:8080 leave-service:2024sl70007'
+                  sh 'sleep 3'
+                  sh 'docker logs leave-staging'
+              }
+          }
       }
   }
